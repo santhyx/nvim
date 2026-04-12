@@ -32,7 +32,6 @@ return {
         "vtsls",
         "vue-language-server",
         "yaml-language-server",
-        "biome",
         "csharpier",
         "fantomas",
         "gofumpt",
