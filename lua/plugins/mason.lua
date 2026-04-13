@@ -1,7 +1,10 @@
 return {
   "mason-org/mason.nvim",
-  dependencies = "mason-org/mason.nvim",
   opts = {
+    registries = {
+      "github:mason-org/mason-registry",
+      "github:Crashdummyy/mason-registry",
+    },
     ensure_installed = {
       "astro-language-server",
       "biome",
