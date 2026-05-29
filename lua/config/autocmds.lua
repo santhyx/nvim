@@ -7,11 +7,18 @@
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
-vim.api.nvim_create_autocmd("VimEnter", {
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "cs", "typescript", "typescriptreact", "javascript", "javascriptreact" },
+  group = vim.api.nvim_create_augroup("DapProjectConfig", { clear = true }),
   callback = function()
-    local config_path = vim.loop.cwd() .. "/dap.configurations.lua"
-    if vim.fn.filereadable(config_path) == 1 then
-      dofile(config_path)
+    local root = vim.fs.root(0, function(name) return name:match("%.sln$") end)
+        or vim.fs.root(0, function(name) return name:match("%.csproj$") end)
+    if root then
+      local config_path = root .. "/dap.configurations.lua"
+      if vim.fn.filereadable(config_path) == 1 then
+        dofile(config_path)
+      end
     end
   end,
 })
+
