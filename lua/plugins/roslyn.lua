@@ -7,4 +7,5 @@ return {
       razor = { enabled = false },
     },
   },
+  ft = { "cs", "csproj", "sln", "cshtml", "razor" },
 }

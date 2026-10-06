@@ -1,60 +1,50 @@
 return {
-  "NickvanDyke/opencode.nvim",
-  dependencies = {
-    -- Recommended for `ask()` and `select()`.
-    -- Required for `snacks` provider.
-    ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
-    { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
-  },
+  "nickjvandyke/opencode.nvim",
+  -- Defaults to "main", supporting OpenCode v2.
+  -- Uncomment to pull the latest stable release, supporting OpenCode v1.
+  -- version = "*",
   config = function()
-    local opencode_cmd = "opencode --port"
-    ---@type snacks.terminal.Opts
-    local snacks_terminal_opts = {
-      win = {
-        position = "right",
-        enter = false,
-      },
-    }
-
     ---@type opencode.Opts
     vim.g.opencode_opts = {
-      server = {
-        start = function()
-          require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts)
-        end,
-      },
+      -- Your configuration, if any; goto definition on the type for details
     }
 
-    -- Required for `opts.events.reload`.
-    vim.o.autoread = true
-
-    -- Recommended/example keymaps.
+    -- Recommended/example keymaps
     vim.keymap.set({ "n", "x" }, "<C-a>", function()
-      require("opencode").ask("@this: ", { submit = true })
-    end, { desc = "Ask opencode…" })
+      require("opencode").ask("@this: ")
+    end, { desc = "Ask OpenCode…" })
     vim.keymap.set({ "n", "x" }, "<C-x>", function()
       require("opencode").select()
-    end, { desc = "Execute opencode action…" })
-    vim.keymap.set({ "n", "t" }, "<C-.>", function()
-      require("snacks.terminal").toggle(opencode_cmd, snacks_terminal_opts)
-    end, { desc = "Toggle opencode" })
-
+    end, { desc = "Select OpenCode…" })
     vim.keymap.set({ "n", "x" }, "go", function()
-      return require("opencode").operator("@this ")
-    end, { desc = "Add range to opencode", expr = true })
-    vim.keymap.set("n", "goo", function()
-      return require("opencode").operator("@this ") .. "_"
-    end, { desc = "Add line to opencode", expr = true })
-
-    vim.keymap.set("n", "<S-C-u>", function()
-      require("opencode").command("session.half.page.up")
-    end, { desc = "Scroll opencode up" })
-    vim.keymap.set("n", "<S-C-d>", function()
-      require("opencode").command("session.half.page.down")
-    end, { desc = "Scroll opencode down" })
-
-    -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
-    vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
-    vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+      return require("opencode").operator("@this")
+    end, { desc = "Send range to OpenCode", expr = true })
+    vim.keymap.set({ "n" }, "goo", function()
+      return require("opencode").operator("@this") .. "_"
+    end, { desc = "Send line to OpenCode", expr = true })
+    vim.keymap.set({ "n", "x", "t" }, "<C-,>", function()
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        local name = vim.api.nvim_buf_get_name(buf)
+        if name:match("term://.*opencode") then
+          vim.api.nvim_win_close(win, false)
+          return
+        end
+      end
+      -- reuse ukrytego bufora jeśli istnieje
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_valid(buf) then
+          local name = vim.api.nvim_buf_get_name(buf)
+          if name:match("term://.*opencode") then
+            vim.cmd("botright vsplit")
+            vim.api.nvim_win_set_buf(0, buf)
+            vim.cmd("startinsert")
+            return
+          end
+        end
+      end
+      vim.cmd("botright vsplit term://opencode")
+      vim.cmd("startinsert")
+    end, { desc = "Toggle OpenCode on right" })
   end,
 }
