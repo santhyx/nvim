@@ -31,7 +31,6 @@ return {
           return
         end
       end
-      -- reuse ukrytego bufora jeśli istnieje
       for _, buf in ipairs(vim.api.nvim_list_bufs()) do
         if vim.api.nvim_buf_is_valid(buf) then
           local name = vim.api.nvim_buf_get_name(buf)
